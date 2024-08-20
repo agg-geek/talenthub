@@ -14,10 +14,14 @@ mongoose.set('strictQuery', true);
 mongoose
 	.connect(process.env.MONGO_URL)
 	.then(() => console.log('MongoDB connection successful'))
-	.catch(err => console.error(err));
+	.catch((err) => {
+		console.error(err);
+		mongoose.connection.close();
+	});
 
 const randomNo = (min, range) => Math.floor(Math.random() * range) + min;
-const randomElementfromArray = array => array[Math.floor(Math.random() * array.length)];
+const randomElementfromArray = (array) =>
+	array[Math.floor(Math.random() * array.length)];
 
 const seedUsers = async () => {
 	await User.deleteMany({});
@@ -29,7 +33,8 @@ const seedUsers = async () => {
 			name: userData[i].name,
 			username: `${i < usersToMakeSeller ? 's' : 'u'}${i + 1}`,
 			email: `${i < usersToMakeSeller ? 's' : 'u'}${i + 1}@e.com`,
-			password: '$2b$12$FtX20r6R2GE/OlkQ2ELIfOlaBh1T9l8jAsxptwIfLicq2O5mU67hC',
+			password:
+				'$2b$12$FtX20r6R2GE/OlkQ2ELIfOlaBh1T9l8jAsxptwIfLicq2O5mU67hC',
 			country: 'India',
 			phone: userData[i].phonenumber,
 			desc: userData[i].desc,
@@ -126,6 +131,7 @@ const seedDB = async () => {
 	await seedReviews();
 };
 
-seedDB().then(() => {
-	mongoose.connection.close();
-});
+seedDB()
+	.then(() => console.log('Seeding database success'))
+	.catch(() => console.log('Seeding database failed'))
+	.finally(() => mongoose.connection.close());
